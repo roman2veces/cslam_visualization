@@ -50,17 +50,17 @@ class PointCloudVisualizer():
             self.node.get_logger().info("rotation_to_sensor_frame: {} ".format(self.params["rotation_to_sensor_frame"]))
         
         # UNCOMMENT TO RETRIEVE MAP
-        if self.params['map_path'] != '':
-            timer = threading.Timer(5.0, self.retrieve_map)
-            timer.start()
+        # if self.params['map_path'] != '':
+        #     timer = threading.Timer(5.0, self.retrieve_map)
+        #     timer.start()
 
     def pointclouds_callback(self, msg):
         if msg.robot_id not in self.pointclouds:
             self.pointclouds[msg.robot_id] = []
         self.pointclouds[msg.robot_id].append(msg)
 
-        # TODO: store data if necessary
-        self.store_point_cloud(msg.pointcloud); 
+        if self.params['map_path'] != '':
+            self.store_point_cloud(msg); 
 
     def pose_to_transform(self, pose):
         quat = [pose.orientation.w, pose.orientation.x, pose.orientation.y, pose.orientation.z]
@@ -218,10 +218,15 @@ class PointCloudVisualizer():
         """Store point cloud data into a given .pcd file 
 
         Args:
-            pc_msg (sensor_msgs/Pointcloud2): point cloud
+            pc_msg (VizPointCloud): point cloud 
         """
-        point_cloud = icp_utils.ros_to_open3d(pc_msg)
-        open3d.io.write_point_cloud("/home/romantwice/data.pcd", point_cloud)
+        
+        robot_folder = self.params["map_path"] + "/robot" + str(pc_msg.robot_id)
+        os.makedirs(robot_folder, exist_ok=True)        
+        pcd_file_path = robot_folder + "/keyframe_" + str(pc_msg.keyframe_id) + ".pcd"
+        
+        point_cloud = icp_utils.ros_to_open3d(pc_msg.pointcloud)
+        open3d.io.write_point_cloud(pcd_file_path, point_cloud)
 
     def retrieve_map(self):
         # TODO: make able to use relative and absolute path

@@ -50,8 +50,6 @@ if __name__ == '__main__':
     pointcloud_viz = []
     if params['enable_pointclouds_visualization']:
         pointcloud_viz = PointCloudVisualizer(node, params, pose_graph_viz)
-
-    map_keeper_node = MapKeeper(node, pose_graph_viz, pointcloud_viz)
         
     node.get_logger().info('Initialization done.')
     rclpy.spin(node)

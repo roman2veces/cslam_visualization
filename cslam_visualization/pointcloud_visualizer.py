@@ -219,8 +219,7 @@ class PointCloudVisualizer():
 
         Args:
             pc_msg (VizPointCloud): point cloud 
-        """
-        
+        """       
         robot_folder = self.params["map_path"] + "/robot" + str(pc_msg.robot_id)
         os.makedirs(robot_folder, exist_ok=True)        
         pcd_file_path = robot_folder + "/keyframe_" + str(pc_msg.keyframe_id) + ".pcd"
@@ -228,59 +227,59 @@ class PointCloudVisualizer():
         point_cloud = icp_utils.ros_to_open3d(pc_msg.pointcloud)
         open3d.io.write_point_cloud(pcd_file_path, point_cloud)
 
-    def retrieve_map(self):
+    # def retrieve_map(self):
         # TODO: make able to use relative and absolute path
         # TODO: use file name as param
-        pose_graph_path = self.params['map_path'] + '/pose_graph.json'
+        # pose_graph_path = self.params['map_path'] + '/pose_graph.json'
 
-        with open(pose_graph_path, 'r') as file:
-            global_pose_graph = json.load(file)
-            for robot_id, robot_pose_graph in global_pose_graph.items():
-                # TODO: check if we cannot get the data with the right types
-                robot_id_int = int(robot_id)
-                point_cloud_keyframes_folder = self.params['map_path'] + '/robot' + str(robot_id) 
-                for keyframe_id, pose_graph_keyframe in robot_pose_graph['values'].items():
-                    point_cloud_keyframe_path = point_cloud_keyframes_folder + '/keyframe_' + str(keyframe_id) + '.pcd'
+        # with open(pose_graph_path, 'r') as file:
+        #     global_pose_graph = json.load(file)
+        #     for robot_id, robot_pose_graph in global_pose_graph.items():
+        #         # TODO: check if we cannot get the data with the right types
+        #         robot_id_int = int(robot_id)
+        #         point_cloud_keyframes_folder = self.params['map_path'] + '/robot' + str(robot_id) 
+        #         for keyframe_id, pose_graph_keyframe in robot_pose_graph['values'].items():
+        #             point_cloud_keyframe_path = point_cloud_keyframes_folder + '/keyframe_' + str(keyframe_id) + '.pcd'
                     
-                    self.pose_graph_viz.origin_robot_ids[robot_id_int] = robot_id_int
-                    if robot_id_int not in self.pose_graph_viz.robot_pose_graphs:
-                        self.pose_graph_viz.robot_pose_graphs[robot_id_int] = {}
+        #             self.pose_graph_viz.origin_robot_ids[robot_id_int] = robot_id_int
+        #             if robot_id_int not in self.pose_graph_viz.robot_pose_graphs:
+        #                 self.pose_graph_viz.robot_pose_graphs[robot_id_int] = {}
                     
-                    pose = Pose()
-                    pose.position.x = pose_graph_keyframe['position']['x']
-                    pose.position.y = pose_graph_keyframe['position']['y']
-                    pose.position.z = pose_graph_keyframe['position']['z']
-                    pose.orientation.x = pose_graph_keyframe['orientation']['x']
-                    pose.orientation.y = pose_graph_keyframe['orientation']['y']
-                    pose.orientation.z = pose_graph_keyframe['orientation']['z']
-                    pose.orientation.w = pose_graph_keyframe['orientation']['w']
-                    self.pose_graph_viz.robot_pose_graphs[robot_id_int][keyframe_id] = {
-                        'key': {
-                            'robot_id': robot_id_int,
-                            'keyframe_id': keyframe_id
-                        },
-                        'pose': pose
-                    }
-                    # self.pose_graph_viz.robot_pose_graphs_edges[msg.robot_id] = msg.edges
+        #             pose = Pose()
+        #             pose.position.x = pose_graph_keyframe['position']['x']
+        #             pose.position.y = pose_graph_keyframe['position']['y']
+        #             pose.position.z = pose_graph_keyframe['position']['z']
+        #             pose.orientation.x = pose_graph_keyframe['orientation']['x']
+        #             pose.orientation.y = pose_graph_keyframe['orientation']['y']
+        #             pose.orientation.z = pose_graph_keyframe['orientation']['z']
+        #             pose.orientation.w = pose_graph_keyframe['orientation']['w']
+        #             self.pose_graph_viz.robot_pose_graphs[robot_id_int][keyframe_id] = {
+        #                 'key': {
+        #                     'robot_id': robot_id_int,
+        #                     'keyframe_id': keyframe_id
+        #                 },
+        #                 'pose': pose
+        #             }
+        #             # self.pose_graph_viz.robot_pose_graphs_edges[msg.robot_id] = msg.edges
                     
-                    if (os.path.exists(point_cloud_keyframe_path)):
-                        pcd = open3d.io.read_point_cloud(point_cloud_keyframe_path)
-                        ros_point_cloud = icp_utils.open3d_to_ros(pcd)
+        #             if (os.path.exists(point_cloud_keyframe_path)):
+        #                 pcd = open3d.io.read_point_cloud(point_cloud_keyframe_path)
+        #                 ros_point_cloud = icp_utils.open3d_to_ros(pcd)
                         
-                        # Prepare and publish point cloud marker
-                        marker = self.pointcloud_to_marker(0, 0, ros_point_cloud)
-                        marker.header.frame_id = 'robot' + str(robot_id) + '_keyframe' + str(keyframe_id)        
-                        marker.header.stamp = rclpy.time.Time().to_msg()
-                        self.markers_publisher.publish(marker)
+        #                 # Prepare and publish point cloud marker
+        #                 marker = self.pointcloud_to_marker(0, 0, ros_point_cloud)
+        #                 marker.header.frame_id = 'robot' + str(robot_id) + '_keyframe' + str(keyframe_id)        
+        #                 marker.header.stamp = rclpy.time.Time().to_msg()
+        #                 self.markers_publisher.publish(marker)
 
-                        # Prepare and broadcast transform
-                        tf_to_publish = TransformStamped()
-                        tf_to_publish.header.frame_id = 'robot' + str(robot_id) + '_map'
-                        tf_to_publish.header.stamp = rclpy.time.Time().to_msg()
-                        tf_to_publish.child_frame_id = marker.header.frame_id
-                        tf = self.pose_to_transform(pose)
-                        tf_to_publish.transform = tf.to_msg()
-                        self.tf_broadcaster.sendTransform(tf_to_publish)
+        #                 # Prepare and broadcast transform
+        #                 tf_to_publish = TransformStamped()
+        #                 tf_to_publish.header.frame_id = 'robot' + str(robot_id) + '_map'
+        #                 tf_to_publish.header.stamp = rclpy.time.Time().to_msg()
+        #                 tf_to_publish.child_frame_id = marker.header.frame_id
+        #                 tf = self.pose_to_transform(pose)
+        #                 tf_to_publish.transform = tf.to_msg()
+        #                 self.tf_broadcaster.sendTransform(tf_to_publish)
 
                  
         # pcd = open3d.io.read_point_cloud(self.params['map_path'] + '/robot0/keyframe_8.pcd')

@@ -7,4 +7,4 @@
     voxel_size: 0.1
     pose_graph_markers_size: 1.0
     produce_mesh: false
-    map_path: /home/polyorbite/Projects/MISTLab/Swarm-SLAM/src/cslam_visualization/map
+    map_path: /home/romantwice/Projects/MISTLab/Swarm-SLAM/src/cslam_visualization/map

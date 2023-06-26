@@ -21,90 +21,47 @@ class PoseGraphVisualizer():
             PoseGraph, '/cslam/viz/pose_graph', self.pose_graph_callback, 10)
         self.robot_pose_graphs = {}
         self.robot_pose_graphs_edges = {}
+        self.pose_graph_to_store = {}
         self.origin_robot_ids = {}
         self.timer = self.node.create_timer(
             self.visualizer_update_period_ms_ / 1000.0,
             self.visualization_callback)
         
     def store_pose_graph(self, msg):
-        # TODO: path should be a param 
-        file_path = "/home/romantwice/Projects/MISTLab/Swarm-SLAM/src/cslam_visualization/pose_graph.json"
-        
-        # TODO: change this implementation method, w rewrites the file everytime
-        try:
-            with open(file_path, "w+") as json_file:
-                pose_graph_to_store = {}
-                if (os.path.exists(file_path)):
-                    try:
-                        pose_graph_to_store = json.load(json_file)
-                    except:
-                        self.node.get_logger().info("File empty")
-                            
-                if msg.robot_id not in pose_graph_to_store:
-                    pose_graph_to_store[msg.robot_id] = {
-                        "edges": {},
-                        "values": {}
-                    }
+        # Make sure that intermediate directories exist
+        os.makedirs(self.params["map_path"], exist_ok=True)
 
-                for pose_graph_value in msg.values:
-                    pose_graph_to_store[msg.robot_id]["values"][pose_graph_value.key.keyframe_id] = {
-                        "position": {
-                            "x": pose_graph_value.pose.position.x,
-                            "y": pose_graph_value.pose.position.y,
-                            "z": pose_graph_value.pose.position.z
-                        },
-                        "orientation": {
-                            "x": pose_graph_value.pose.orientation.x,
-                            "y": pose_graph_value.pose.orientation.y,
-                            "z": pose_graph_value.pose.orientation.z,
-                            "w": pose_graph_value.pose.orientation.w
-                        }
-                    }
-                    
-                for pose_graph_edge in msg.edges:
-                    pose_graph_to_store[msg.robot_id]["edges"][pose_graph_value.key.keyframe_id] = {
-                        "key_from": {
-                            "robot_id": pose_graph_edge.key_from.robot_id,
-                            "keyframe_id": pose_graph_edge.key_from.keyframe_id
-                        },
-                        "key_to": {
-                            "robot_id": pose_graph_edge.key_to.robot_id,
-                            "keyframe_id": pose_graph_edge.key_to.keyframe_id
-                        },
-                        "measurement": {
-                            "position": {
-                                "x": pose_graph_edge.measurement.position.x,
-                                "y": pose_graph_edge.measurement.position.y,
-                                "z": pose_graph_edge.measurement.position.z
-                            },
-                            "orientation": {
-                                "x": pose_graph_edge.measurement.orientation.x,
-                                "y": pose_graph_edge.measurement.orientation.y,
-                                "z": pose_graph_edge.measurement.orientation.z,
-                                "w": pose_graph_edge.measurement.orientation.w,
-                            },
-                        },
-                        "noise_std": pose_graph_edge.noise_std.tolist()
-                    }
-                    # self.node.get_logger().info(str(type(pose_graph_edge.noise_std)))
-                    
-                # Write the data to the JSON file
-                self.node.get_logger().info("INSIDE JUMP")
-                json.dump(pose_graph_to_store, json_file)
-        except:
-            self.node.get_logger().info(f"Error: File '{file_path}' not found.")
+        pose_graph_path = self.params["map_path"] + "/pose_graph.json"
+        with open(pose_graph_path, "w+") as json_file:
+            # Initialize pose graph to be stored
+            # pose_graph_to_store = {}
+
+            # Read file is not empty
+            # if os.path.getsize(pose_graph_path) != 0:
+            #     pose_graph_to_store = json.load(json_file)
+
+            # TODO: handle case when there is a previous different data 
+            json.dump(self.pose_graph_to_store, json_file)
+
 
     def pose_graph_callback(self, msg):
         self.origin_robot_ids[msg.robot_id] = msg.origin_robot_id
         if msg.robot_id not in self.robot_pose_graphs:
             self.robot_pose_graphs[msg.robot_id] = {}
+            self.pose_graph_to_store[msg.robot_id] = {
+                "edges": {},
+                "values": {}
+            }
 
         for pose in msg.values:
             self.robot_pose_graphs[msg.robot_id][pose.key.keyframe_id] = pose
-            
+            self.pose_graph_to_store[msg.robot_id]["values"][pose.key.keyframe_id] = self.pose_graph_value_to_dict(pose)
+
         self.robot_pose_graphs_edges[msg.robot_id] = msg.edges
-        # TODO: remove
-        # self.store_pose_graph(msg)
+        for edge in msg.edges:
+            self.pose_graph_to_store[msg.robot_id]["edges"] = self.pose_graph_edge_to_dict(edge)
+    
+        self.store_pose_graph(msg)
 
     def robot_pose_graphs_to_marker_array(self):
         """Converts a PoseGraph messages to a MarkerArray message"""
@@ -158,7 +115,50 @@ class PoseGraphVisualizer():
             marker_array.markers.append(marker)
 
         return marker_array
- 
+
+    # TODO: Document this method
+    def pose_graph_value_to_dict(self, pose_graph_value):
+        return {
+            "position": {
+                "x": pose_graph_value.pose.position.x,
+                "y": pose_graph_value.pose.position.y,
+                "z": pose_graph_value.pose.position.z
+            },
+            "orientation": {
+                "x": pose_graph_value.pose.orientation.x,
+                "y": pose_graph_value.pose.orientation.y,
+                "z": pose_graph_value.pose.orientation.z,
+                "w": pose_graph_value.pose.orientation.w
+            }
+        }
+    
+    # TODO: Document this method
+    def pose_graph_edge_to_dict(self, edge):
+        return {
+            "key_from": {
+                "robot_id": edge.key_from.robot_id,
+                "keyframe_id": edge.key_from.keyframe_id
+            },
+            "key_to": {
+                "robot_id": edge.key_to.robot_id,
+                "keyframe_id": edge.key_to.keyframe_id
+            },
+            "measurement": {
+                "position": {
+                    "x": edge.measurement.position.x,
+                    "y": edge.measurement.position.y,
+                    "z": edge.measurement.position.z
+                },
+                "orientation": {
+                    "x": edge.measurement.orientation.x,
+                    "y": edge.measurement.orientation.y,
+                    "z": edge.measurement.orientation.z,
+                    "w": edge.measurement.orientation.w,
+                },
+            },
+            "noise_std": edge.noise_std.tolist()
+        }
+
     def visualization_callback(self):
         marker_array = self.robot_pose_graphs_to_marker_array()
         self.pose_graph_markers_publisher.publish(marker_array)

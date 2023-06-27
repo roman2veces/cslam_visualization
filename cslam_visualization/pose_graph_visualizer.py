@@ -1,11 +1,17 @@
+import threading
 import rclpy
 import json
 import os.path
 from rclpy.node import Node
 
 from cslam_common_interfaces.msg import PoseGraph
+from cslam_common_interfaces.msg import PoseGraphValue
+from cslam_common_interfaces.msg import PoseGraphEdge
+from cslam_common_interfaces.msg import MultiRobotKey
 from visualization_msgs.msg import MarkerArray, Marker
 from distinctipy import distinctipy
+
+from geometry_msgs.msg import Pose # TODO: remove this
 
 class PoseGraphVisualizer():
 
@@ -27,6 +33,48 @@ class PoseGraphVisualizer():
             self.visualizer_update_period_ms_ / 1000.0,
             self.visualization_callback)
         
+        timer = threading.Timer(5.0, self.retrieve_pose_graph)
+        timer.start()
+
+    def retrieve_pose_graph(self):
+        pose_graph_path = self.params['map_path'] + '/pose_graph.json'
+
+        # TODO: recycle code
+        with open(pose_graph_path, 'r') as file:
+            global_pose_graph = json.load(file)
+            for robot_id, robot_pose_graph in global_pose_graph.items():
+                robot_id_int = int(robot_id)
+                self.origin_robot_ids[robot_id_int] = robot_id_int
+                
+                if robot_id_int not in self.robot_pose_graphs:
+                    self.robot_pose_graphs[robot_id_int] = {}
+
+                for keyframe_id, pose_dict in robot_pose_graph["values"].items():
+                    keyframe_id_int = int(keyframe_id)
+                    pose_graph_value = PoseGraphValue()
+                    pose_graph_value.key = MultiRobotKey()
+                    pose_graph_value.key.robot_id = robot_id_int
+                    pose_graph_value.key.keyframe_id = keyframe_id_int
+                    pose_graph_value.pose = self.dict_to_pose(pose_dict)
+                    self.robot_pose_graphs[robot_id_int][keyframe_id_int] = pose_graph_value
+
+                if robot_id_int not in self.robot_pose_graphs_edges:
+                    self.robot_pose_graphs_edges[robot_id_int] = []
+                    
+                for edge_dict in robot_pose_graph["edges"]: 
+                    pose_graph_edge = PoseGraphEdge()
+                    pose_graph_edge.key_from = MultiRobotKey()
+                    pose_graph_edge.key_from.robot_id = int(edge_dict["key_from"]["robot_id"])
+                    pose_graph_edge.key_from.keyframe_id = int(edge_dict["key_from"]["keyframe_id"])
+                    pose_graph_edge.key_to = MultiRobotKey()
+                    pose_graph_edge.key_to.robot_id = int(edge_dict["key_to"]["robot_id"])
+                    pose_graph_edge.key_to.keyframe_id = int(edge_dict["key_to"]["keyframe_id"])
+                    
+                    pose_graph_edge.measurement = self.dict_to_pose(edge_dict["measurement"])
+                    pose_graph_edge.noise_std = edge_dict["noise_std"]
+                    self.robot_pose_graphs_edges[robot_id_int].append(pose_graph_edge)
+                
+
     def store_pose_graph(self, msg):
         # Make sure that intermediate directories exist
         os.makedirs(self.params["map_path"], exist_ok=True)
@@ -43,7 +91,6 @@ class PoseGraphVisualizer():
             # TODO: handle case when there is a previous different data 
             json.dump(self.pose_graph_to_store, json_file)
 
-
     def pose_graph_callback(self, msg):
         self.origin_robot_ids[msg.robot_id] = msg.origin_robot_id
         if msg.robot_id not in self.robot_pose_graphs:
@@ -58,8 +105,7 @@ class PoseGraphVisualizer():
             self.pose_graph_to_store[msg.robot_id]["values"][pose.key.keyframe_id] = self.pose_graph_value_to_dict(pose)
 
         self.robot_pose_graphs_edges[msg.robot_id] = msg.edges
-        for edge in msg.edges:
-            self.pose_graph_to_store[msg.robot_id]["edges"] = self.pose_graph_edge_to_dict(edge)
+        self.pose_graph_to_store[msg.robot_id]["edges"] = list(map(self.pose_graph_edge_to_dict, msg.edges)) 
     
         self.store_pose_graph(msg)
 
@@ -158,6 +204,17 @@ class PoseGraphVisualizer():
             },
             "noise_std": edge.noise_std.tolist()
         }
+
+    def dict_to_pose(self, dict):
+        pose = Pose()
+        pose.position.x = dict['position']['x']
+        pose.position.y = dict['position']['y']
+        pose.position.z = dict['position']['z']
+        pose.orientation.x = dict['orientation']['x']
+        pose.orientation.y = dict['orientation']['y']
+        pose.orientation.z = dict['orientation']['z']
+        pose.orientation.w = dict['orientation']['w']
+        return pose
 
     def visualization_callback(self):
         marker_array = self.robot_pose_graphs_to_marker_array()

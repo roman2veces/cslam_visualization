@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+import threading # TODO: remove
 import rclpy
 from rclpy.node import Node
 
@@ -22,7 +23,8 @@ if __name__ == '__main__':
                         ('voxel_size', 0.5),
                         ('rotation_to_sensor_frame', None),
                         ('pose_graph_markers_size', 0.1),
-                        ('map_path', ''),]) # TODO: test if this default value works
+                        ('map_path', ''), # TODO: test if this default value works
+                        ('read_map', False),]), 
     params = {}
     params['nb_colors'] = node.get_parameter(
         'nb_colors').value
@@ -42,6 +44,8 @@ if __name__ == '__main__':
         'produce_mesh').value
     params['map_path'] = node.get_parameter(
         'map_path').value
+    params['read_map'] = node.get_parameter(
+        'read_map').value
     
     pose_graph_viz = PoseGraphVisualizer(node, params)
     keypoints_viz = []
@@ -50,7 +54,15 @@ if __name__ == '__main__':
     pointcloud_viz = []
     if params['enable_pointclouds_visualization']:
         pointcloud_viz = PointCloudVisualizer(node, params, pose_graph_viz)
-        
+
     node.get_logger().info('Initialization done.')
+    
+    if params['read_map']:
+        pose_graph_viz.retrieve_pose_graph()
+        
+        timer = threading.Timer(10.0, pointcloud_viz.retrieve_map)
+        timer.start()
+        
+    
     rclpy.spin(node)
     rclpy.shutdown()

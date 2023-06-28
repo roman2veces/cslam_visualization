@@ -1,4 +1,4 @@
-import threading
+# import threading
 import rclpy
 import json
 import os.path
@@ -33,13 +33,14 @@ class PoseGraphVisualizer():
             self.visualizer_update_period_ms_ / 1000.0,
             self.visualization_callback)
         
-        timer = threading.Timer(5.0, self.retrieve_pose_graph)
-        timer.start()
+        # timer = threading.Timer(5.0, self.retrieve_pose_graph)
+        # timer.start()
 
     def retrieve_pose_graph(self):
         pose_graph_path = self.params['map_path'] + '/pose_graph.json'
 
         # TODO: recycle code
+        # TODO: bug is path doesnt exist
         with open(pose_graph_path, 'r') as file:
             global_pose_graph = json.load(file)
             for robot_id, robot_pose_graph in global_pose_graph.items():
@@ -60,7 +61,7 @@ class PoseGraphVisualizer():
 
                 if robot_id_int not in self.robot_pose_graphs_edges:
                     self.robot_pose_graphs_edges[robot_id_int] = []
-                    
+
                 for edge_dict in robot_pose_graph["edges"]: 
                     pose_graph_edge = PoseGraphEdge()
                     pose_graph_edge.key_from = MultiRobotKey()

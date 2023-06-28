@@ -23,8 +23,13 @@ if __name__ == '__main__':
                         ('voxel_size', 0.5),
                         ('rotation_to_sensor_frame', None),
                         ('pose_graph_markers_size', 0.1),
-                        ('map_path', ''), # TODO: test if this default value works
-                        ('read_map', False),]), 
+                        # TODO: test if this default value works
+                        # TODO: raise exception if map_path is not given when enable_map_storage or 
+                        # enable_map_reading are true, or use a default path 
+                        ('map_path', ''),
+                        ('pose_graph_file_name', 'pose_graph.json'), 
+                        ('enable_map_storage', False),
+                        ('enable_map_reading', False),]), 
     params = {}
     params['nb_colors'] = node.get_parameter(
         'nb_colors').value
@@ -42,10 +47,16 @@ if __name__ == '__main__':
         'pose_graph_markers_size').value
     params['produce_mesh'] = node.get_parameter(
         'produce_mesh').value
+    
+    # Storage parameters
     params['map_path'] = node.get_parameter(
         'map_path').value
-    params['read_map'] = node.get_parameter(
-        'read_map').value
+    params['pose_graph_file_name'] = node.get_parameter(
+        'pose_graph_file_name').value
+    params['enable_map_storage'] = node.get_parameter(
+        'enable_map_storage').value
+    params['enable_map_reading'] = node.get_parameter(
+        'enable_map_reading').value
     
     pose_graph_viz = PoseGraphVisualizer(node, params)
     keypoints_viz = []
@@ -57,10 +68,11 @@ if __name__ == '__main__':
 
     node.get_logger().info('Initialization done.')
     
-    if params['read_map']:
+    if params['enable_map_reading']:
         pose_graph_viz.retrieve_pose_graph()
         
-        timer = threading.Timer(10.0, pointcloud_viz.retrieve_map)
+        # TODO: remove this timer
+        timer = threading.Timer(10.0, pointcloud_viz.retrieve_point_cloud_keyframes)
         timer.start()
         
     

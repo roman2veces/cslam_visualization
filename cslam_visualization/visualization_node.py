@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-import threading # TODO: remove
 import rclpy
 from rclpy.node import Node
 
@@ -69,11 +68,7 @@ if __name__ == '__main__':
     
     if params['enable_map_reading']:
         pose_graph_viz.retrieve_pose_graph()
-        
-        # TODO: remove this timer
-        timer = threading.Timer(5.0, pointcloud_viz.retrieve_point_cloud_keyframes)
-        timer.start()
-        
+        pointcloud_viz.retrieve_point_cloud_keyframes()
     
     rclpy.spin(node)
     rclpy.shutdown()

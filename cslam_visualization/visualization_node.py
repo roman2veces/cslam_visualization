@@ -7,7 +7,6 @@ from cslam_common_interfaces.msg import PoseGraph
 from cslam_visualization.pose_graph_visualizer import PoseGraphVisualizer
 from cslam_visualization.keypoints3d_visualizer import Keypoints3DVisualizer
 from cslam_visualization.pointcloud_visualizer import PointCloudVisualizer
-from cslam_visualization.map_keeper import MapKeeper
 
 if __name__ == '__main__':
 
@@ -72,7 +71,7 @@ if __name__ == '__main__':
         pose_graph_viz.retrieve_pose_graph()
         
         # TODO: remove this timer
-        timer = threading.Timer(10.0, pointcloud_viz.retrieve_point_cloud_keyframes)
+        timer = threading.Timer(5.0, pointcloud_viz.retrieve_point_cloud_keyframes)
         timer.start()
         
     

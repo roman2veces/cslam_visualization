@@ -247,10 +247,10 @@ class PointCloudVisualizer():
     def visualization_callback(self):
         self.keyframe_pointcloud_to_pose_pointcloud()
         self.node.get_logger().info("Publishing " + str(len(self.markers_to_publish)) + " pointclouds.")
+        for tf in self.tfs_to_publish:
+            self.tf_broadcaster.sendTransform(tf)
         for pc in self.markers_to_publish:
             self.pointclouds_keys_published.add((pc.ns, pc.id))
             self.markers_publisher.publish(pc)
-        for tf in self.tfs_to_publish:
-            self.tf_broadcaster.sendTransform(tf)
         self.markers_to_publish = []
         

@@ -23,7 +23,7 @@ def launch_setup(context, *args, **kwargs):
             arguments=['-d', LaunchConfiguration('rviz_config').perform(context)],
         )
     storage_node = Node(package='cslam_storage',
-            executable='cslam_storage',
+            executable='cslam_storage.py',
             name='cslam_storage',
             parameters=[LaunchConfiguration('storage_config')]
             # arguments=['-d', LaunchConfiguration('rviz_config').perform(context)],

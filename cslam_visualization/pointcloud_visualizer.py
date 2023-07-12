@@ -1,4 +1,3 @@
-import json
 import os
 import rclpy
 from rclpy.node import Node 
@@ -20,7 +19,6 @@ import cslam.lidar_pr.icp_utils as icp_utils
 from cslam.utils.point_cloud2 import read_points, read_points_numpy_filtered
 from struct import pack, unpack
 import open3d
-import threading
 
 class PointCloudVisualizer():
 
@@ -33,11 +31,7 @@ class PointCloudVisualizer():
         self.visualizer_update_period_ms_ = self.params["visualization_update_period_ms"]  
         self.pointclouds_subscriber = self.node.create_subscription(
             VizPointCloud, '/cslam/viz/keyframe_pointcloud', self.pointclouds_callback, 10)
-        
-        if self.params["enable_map_storage"]:
-            self.pointclouds_storage_subscriber = self.node.create_subscription(
-                VizPointCloud, '/cslam/viz/keyframe_pointcloud', self.point_clouds_storage_callback, 10)
-            
+       
         self.pointclouds = {}
         self.timer = self.node.create_timer(
             self.visualizer_update_period_ms_ / 1000.0,
@@ -210,19 +204,6 @@ class PointCloudVisualizer():
                             self.tfs_to_publish.append(tf_to_publish)
                             self.previous_poses = copy.deepcopy(self.pose_graph_viz.robot_pose_graphs)
                             self.pointclouds[robot_id].remove(pcl)
-
-    def point_clouds_storage_callback(self, pc_msg):
-        """Store point cloud data into a given .pcd file 
-
-        Args:
-            pc_msg (VizPointCloud): point cloud message 
-        """       
-        robot_folder = self.params["map_path"] + "/robot" + str(pc_msg.robot_id)
-        os.makedirs(robot_folder, exist_ok=True)        
-        pcd_file_path = robot_folder + "/keyframe_" + str(pc_msg.keyframe_id) + ".pcd"
-        
-        point_cloud = icp_utils.ros_to_open3d(pc_msg.pointcloud)
-        open3d.io.write_point_cloud(pcd_file_path, point_cloud)
 
     def retrieve_point_cloud_keyframes(self):
         # TODO: make able to use relative and absolute path

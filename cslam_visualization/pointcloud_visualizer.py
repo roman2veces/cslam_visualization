@@ -6,7 +6,6 @@ import numpy as np
 from cslam_common_interfaces.msg import VizPointCloud
 from visualization_msgs.msg import MarkerArray, Marker
 from geometry_msgs.msg import Point
-from geometry_msgs.msg import Pose 
 from std_msgs.msg import ColorRGBA
 import math
 from cslam_visualization.utils.transform import Transform

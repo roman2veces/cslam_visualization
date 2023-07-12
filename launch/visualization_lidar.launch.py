@@ -22,10 +22,17 @@ def launch_setup(context, *args, **kwargs):
             name='rviz2',
             arguments=['-d', LaunchConfiguration('rviz_config').perform(context)],
         )
+    storage_node = Node(package='cslam_storage',
+            executable='cslam_storage',
+            name='cslam_storage',
+            parameters=[LaunchConfiguration('storage_config')]
+            # arguments=['-d', LaunchConfiguration('rviz_config').perform(context)],
+        )
     
     return [
         visualization_node,
         rviz_node,
+        storage_node
     ]
 
 
@@ -43,6 +50,9 @@ def generate_launch_description():
         DeclareLaunchArgument('rviz_config_file',
                               default_value='lidar.rviz',
                               description=''),
+        DeclareLaunchArgument('storage_config_file',
+                              default_value='storage.yaml',
+                              description=''),
         DeclareLaunchArgument('config',
                               default_value=[
                                   LaunchConfiguration('config_path'),
@@ -53,6 +63,12 @@ def generate_launch_description():
                               default_value=[
                                   LaunchConfiguration('config_path'),
                                   LaunchConfiguration('rviz_config_file')
+                              ],
+                              description=''),
+        DeclareLaunchArgument('storage_config',
+                              default_value=[
+                                  LaunchConfiguration('config_path'),
+                                  LaunchConfiguration('storage_config_file')
                               ],
                               description=''),
         OpaqueFunction(function=launch_setup)

@@ -3,8 +3,11 @@ import json
 from rclpy.node import Node
 
 from cslam_common_interfaces.msg import PoseGraph
-from visualization_msgs.msg import MarkerArray, Marker
+from cslam_common_interfaces.msg import PoseGraphValue
+from cslam_common_interfaces.msg import PoseGraphEdge
+from cslam_common_interfaces.msg import MultiRobotKey
 from geometry_msgs.msg import Pose
+from visualization_msgs.msg import MarkerArray, Marker
 from distinctipy import distinctipy
 
 class PoseGraphVisualizer():
@@ -64,7 +67,8 @@ class PoseGraphVisualizer():
             self.robot_pose_graphs[msg.robot_id][pose.key.keyframe_id] = pose
             
         self.robot_pose_graphs_edges[msg.robot_id] = msg.edges
-        
+    
+    # Conversion methods
     def robot_pose_graphs_to_marker_array(self):
         """Converts a PoseGraph messages to a MarkerArray message"""
         marker_array = MarkerArray()
@@ -117,7 +121,43 @@ class PoseGraphVisualizer():
             marker_array.markers.append(marker)
 
         return marker_array
-                    
+
+    def dict_to_pose(self, dict):
+        """Convert dict to geometry_msgs/msg/Pose""" 
+        pose = Pose()
+        pose.position.x = dict['position']['x']
+        pose.position.y = dict['position']['y']
+        pose.position.z = dict['position']['z']
+        pose.orientation.x = dict['orientation']['x']
+        pose.orientation.y = dict['orientation']['y']
+        pose.orientation.z = dict['orientation']['z']
+        pose.orientation.w = dict['orientation']['w']
+        return pose
+    
+    def dict_to_pose_graph_value(self, dict, robot_id, keyframe_id):
+        """ Convert dict to cslam_common_interfaces/msg/PoseGraphValue
+            Attention: the "key" property is not converted
+        """
+        pose_graph_value = PoseGraphValue()
+        pose_graph_value.key = MultiRobotKey()
+        pose_graph_value.key.robot_id = robot_id
+        pose_graph_value.key.keyframe_id = keyframe_id
+        pose_graph_value.pose = self.dict_to_pose(dict)
+        return pose_graph_value
+
+    def dict_to_pose_graph_edge(self, dict):
+        """ Convert dict to cslam_common_interfaces/msg/PoseGraphEdge """
+        pose_graph_edge = PoseGraphEdge()
+        pose_graph_edge.key_from = MultiRobotKey()
+        pose_graph_edge.key_from.robot_id = int(dict["key_from"]["robot_id"])
+        pose_graph_edge.key_from.keyframe_id = int(dict["key_from"]["keyframe_id"])
+        pose_graph_edge.key_to = MultiRobotKey()
+        pose_graph_edge.key_to.robot_id = int(dict["key_to"]["robot_id"])
+        pose_graph_edge.key_to.keyframe_id = int(dict["key_to"]["keyframe_id"])
+        pose_graph_edge.measurement = self.dict_to_pose(dict["measurement"])
+        pose_graph_edge.noise_std = dict["noise_std"]                    
+        return pose_graph_edge
+
     def visualization_callback(self):
         marker_array = self.robot_pose_graphs_to_marker_array()
         self.pose_graph_markers_publisher.publish(marker_array)

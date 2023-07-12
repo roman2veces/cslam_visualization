@@ -67,7 +67,7 @@ if __name__ == '__main__':
     node.get_logger().info('Initialization done.')
     
     # if params['enable_map_reading']:
-        # pose_graph_viz.retrieve_pose_graph()
+    pose_graph_viz.retrieve_pose_graph()
         # pointcloud_viz.retrieve_point_cloud_keyframes()
         # cslam_storage = CslamStorage(params)
 

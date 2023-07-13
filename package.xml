@@ -54,6 +54,7 @@
   <build_depend>perception_pcl</build_depend>
   <build_depend>cslam_common_interfaces</build_depend>
   <build_depend>cslam_common_interfaces</build_depend>
+  <build_depend>cslam_storage</build_depend>
 
   <exec_depend>cv_bridge</exec_depend>
   <exec_depend>rclcpp</exec_depend>
@@ -95,6 +96,7 @@
   <exec_depend>perception_pcl</exec_depend>
   <exec_depend>cslam_common_interfaces</exec_depend>
   <exec_depend>cslam_common_interfaces</exec_depend>  
+  <exec_depend>cslam_storage</exec_depend>  
 
   <test_depend>ament_cmake_gtest</test_depend>
   <test_depend>ament_cmake_pytest</test_depend>

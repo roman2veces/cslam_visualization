@@ -30,18 +30,17 @@ def launch_setup(context, *args, **kwargs):
             parameters=[LaunchConfiguration('storage_config')]
             # arguments=['-d', LaunchConfiguration('rviz_config').perform(context)],
         )
-    map_recovery_node = Node(
-            package='cslam_storage',
-            executable='map_recovery_node.py',
-            name='map_recovery_node',
-            parameters=[LaunchConfiguration('storage_config')]
-        )
+    # map_recovery_node = Node(
+    #         package='cslam_storage',
+    #         executable='map_recovery_node.py',
+    #         name='map_recovery_node',
+    #         parameters=[LaunchConfiguration('storage_config')]
+    #     )
     
     return [
         visualization_node,
         rviz_node,
-        storage_node,
-        map_recovery_node
+        storage_node
     ]
 
 

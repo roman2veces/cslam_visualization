@@ -114,6 +114,7 @@ SET(Libraries
 
 find_package(cslam_common_interfaces REQUIRED)
 find_package(cslam_common_interfaces REQUIRED)
+find_package(cslam_storage REQUIRED)
 
 # add_executable(pose_graph_manager 
 #   src/back_end/decentralized_pgo.cpp

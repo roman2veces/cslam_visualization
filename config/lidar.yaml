@@ -13,5 +13,5 @@
     # TODO: should I find a way to do this with a relative path?
     map_path: /home/romantwice/Projects/MISTLab/Swarm-SLAM/src/cslam_visualization/new_map
     pose_graph_file_name: pose_graph.json
-    enable_map_reading: true 
+    enable_map_reading: false 
     enable_map_storage: false

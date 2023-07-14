@@ -30,6 +30,7 @@ class PoseGraphVisualizer():
             self.visualizer_update_period_ms_ / 1000.0,
             self.visualization_callback)
 
+    # TODO: remove, moved to cslam_storage
     # def retrieve_pose_graph(self):
     #     """ Read pose graph from json file 
     #         Path is passed as parameter in the yaml file """
@@ -122,6 +123,7 @@ class PoseGraphVisualizer():
 
         return marker_array
 
+    # TODO: remove, moved to cslam_storage
     # def dict_to_pose(self, dict):
     #     """Convert dict to geometry_msgs/msg/Pose""" 
     #     pose = Pose()

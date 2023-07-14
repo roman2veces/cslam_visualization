@@ -51,10 +51,6 @@ if __name__ == '__main__':
         'map_path').value
     params['pose_graph_file_name'] = node.get_parameter(
         'pose_graph_file_name').value
-    params['enable_map_storage'] = node.get_parameter(
-        'enable_map_storage').value
-    params['enable_map_reading'] = node.get_parameter(
-        'enable_map_reading').value
     
     pose_graph_viz = PoseGraphVisualizer(node, params)
     keypoints_viz = []
@@ -65,12 +61,6 @@ if __name__ == '__main__':
         pointcloud_viz = PointCloudVisualizer(node, params, pose_graph_viz)
 
     node.get_logger().info('Initialization done.')
-    
-    if params['enable_map_reading']:
-        pose_graph_viz.retrieve_pose_graph()
-        pointcloud_viz.retrieve_point_cloud_keyframes()
-        # cslam_storage = CslamStorage(params)
-
     
     rclpy.spin(node)
     rclpy.shutdown()

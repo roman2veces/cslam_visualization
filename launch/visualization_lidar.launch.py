@@ -28,14 +28,7 @@ def launch_setup(context, *args, **kwargs):
             executable='cslam_storage.py',
             name='cslam_storage',
             parameters=[LaunchConfiguration('storage_config')]
-            # arguments=['-d', LaunchConfiguration('rviz_config').perform(context)],
         )
-    # map_recovery_node = Node(
-    #         package='cslam_storage',
-    #         executable='map_recovery_node.py',
-    #         name='map_recovery_node',
-    #         parameters=[LaunchConfiguration('storage_config')]
-    #     )
     
     return [
         visualization_node,
@@ -58,9 +51,6 @@ def generate_launch_description():
         DeclareLaunchArgument('rviz_config_file',
                               default_value='lidar.rviz',
                               description=''),
-        DeclareLaunchArgument('storage_config_file',
-                              default_value='storage.yaml',
-                              description=''),
         DeclareLaunchArgument('config',
                               default_value=[
                                   LaunchConfiguration('config_path'),
@@ -76,7 +66,7 @@ def generate_launch_description():
         DeclareLaunchArgument('storage_config',
                               default_value=os.path.join(
                                   get_package_share_directory('cslam_storage'),
-                                  'config', 'storage.yaml'),
+                                  'config', 'visualization_storage.yaml'),
                               description=''),
         OpaqueFunction(function=launch_setup)
     ])

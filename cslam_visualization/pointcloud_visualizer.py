@@ -203,27 +203,6 @@ class PointCloudVisualizer():
                             self.tfs_to_publish.append(tf_to_publish)
                             self.previous_poses = copy.deepcopy(self.pose_graph_viz.robot_pose_graphs)
                             self.pointclouds[robot_id].remove(pcl)
-
-    # TODO: Remove, moved to cslam_storage
-    # def retrieve_point_cloud_keyframes(self):
-    #     # TODO: make able to use relative and absolute path
-    #     for robot_id, pose_graph_values in self.pose_graph_viz.robot_pose_graphs.items():
-    #         point_cloud_keyframes_folder = self.params['map_path'] + '/robot' + str(robot_id)
-    #         for keyframe_id, pose_graph_value in pose_graph_values.items():
-    #             point_cloud_keyframe_path = point_cloud_keyframes_folder + '/keyframe_' + str(keyframe_id) + '.pcd'
-            
-    #             if (os.path.exists(point_cloud_keyframe_path)):
-    #                 pcd = open3d.io.read_point_cloud(point_cloud_keyframe_path)
-    #                 point_cloud = icp_utils.open3d_to_ros(pcd)
-    #                 viz_point_cloud = VizPointCloud()
-    #                 viz_point_cloud.robot_id = robot_id
-    #                 viz_point_cloud.keyframe_id = keyframe_id
-    #                 viz_point_cloud.pointcloud = point_cloud
-
-    #                 # TODO: reuse this code (pointcloud callback)
-    #                 if robot_id not in self.pointclouds:
-    #                     self.pointclouds[robot_id] = []
-    #                 self.pointclouds[robot_id].append(viz_point_cloud)
                         
     def visualization_callback(self):
         self.keyframe_pointcloud_to_pose_pointcloud()

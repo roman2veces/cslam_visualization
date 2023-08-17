@@ -30,6 +30,14 @@ def launch_setup(context, *args, **kwargs):
             parameters=[LaunchConfiguration('storage_config')]
         )
     
+    # Map storage node
+    storage_node = Node(
+        package='cslam_storage',
+        executable='cslam_storage.py',
+        name='cslam_storage',
+        parameters=[LaunchConfiguration('storage_config')]
+    )
+    
     return [
         visualization_node,
         rviz_node,

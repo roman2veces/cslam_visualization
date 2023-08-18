@@ -3,10 +3,6 @@ import json
 from rclpy.node import Node
 
 from cslam_common_interfaces.msg import PoseGraph
-# from cslam_common_interfaces.msg import PoseGraphValue
-# from cslam_common_interfaces.msg import PoseGraphEdge
-# from cslam_common_interfaces.msg import MultiRobotKey
-# from geometry_msgs.msg import Pose
 from visualization_msgs.msg import MarkerArray, Marker
 from distinctipy import distinctipy
 
@@ -29,35 +25,6 @@ class PoseGraphVisualizer():
         self.timer = self.node.create_timer(
             self.visualizer_update_period_ms_ / 1000.0,
             self.visualization_callback)
-
-    # TODO: remove, moved to cslam_storage
-    # def retrieve_pose_graph(self):
-    #     """ Read pose graph from json file 
-    #         Path is passed as parameter in the yaml file """
-    #     pose_graph_path = self.params['map_path'] + "/" + self.params['pose_graph_file_name']
-
-    #     # TODO: bug is path doesnt exist
-    #     with open(pose_graph_path, 'r') as file:
-    #         global_pose_graph = json.load(file)
-    #         for robot_id, robot_pose_graph in global_pose_graph.items():
-    #             robot_id_int = int(robot_id)
-    #             self.origin_robot_ids[robot_id_int] = robot_id_int
-                
-    #             if robot_id_int not in self.robot_pose_graphs:
-    #                 self.robot_pose_graphs[robot_id_int] = {}
-
-    #             # Retrieve each cslam_common_interfaces/msg/PoseGraphValue
-    #             for keyframe_id, pose_dict in robot_pose_graph["values"].items():
-    #                 keyframe_id_int = int(keyframe_id)
-    #                 self.robot_pose_graphs[robot_id_int][keyframe_id_int] = self.dict_to_pose_graph_value(pose_dict, robot_id_int, keyframe_id_int)
-
-
-    #             if robot_id_int not in self.robot_pose_graphs_edges:
-    #                 self.robot_pose_graphs_edges[robot_id_int] = []
-                
-    #             # Retrieve each cslam_common_interfaces/msg/PoseGraphEdge
-    #             for edge_dict in robot_pose_graph["edges"]: 
-    #                 self.robot_pose_graphs_edges[robot_id_int].append(self.dict_to_pose_graph_edge(edge_dict))
 
     def pose_graph_callback(self, msg):
         self.origin_robot_ids[msg.robot_id] = msg.origin_robot_id
@@ -122,43 +89,6 @@ class PoseGraphVisualizer():
             marker_array.markers.append(marker)
 
         return marker_array
-
-    # TODO: remove, moved to cslam_storage
-    # def dict_to_pose(self, dict):
-    #     """Convert dict to geometry_msgs/msg/Pose""" 
-    #     pose = Pose()
-    #     pose.position.x = dict['position']['x']
-    #     pose.position.y = dict['position']['y']
-    #     pose.position.z = dict['position']['z']
-    #     pose.orientation.x = dict['orientation']['x']
-    #     pose.orientation.y = dict['orientation']['y']
-    #     pose.orientation.z = dict['orientation']['z']
-    #     pose.orientation.w = dict['orientation']['w']
-    #     return pose
-    
-    # def dict_to_pose_graph_value(self, dict, robot_id, keyframe_id):
-    #     """ Convert dict to cslam_common_interfaces/msg/PoseGraphValue
-    #         Attention: the "key" property is not converted
-    #     """
-    #     pose_graph_value = PoseGraphValue()
-    #     pose_graph_value.key = MultiRobotKey()
-    #     pose_graph_value.key.robot_id = robot_id
-    #     pose_graph_value.key.keyframe_id = keyframe_id
-    #     pose_graph_value.pose = self.dict_to_pose(dict)
-    #     return pose_graph_value
-
-    # def dict_to_pose_graph_edge(self, dict):
-    #     """ Convert dict to cslam_common_interfaces/msg/PoseGraphEdge """
-    #     pose_graph_edge = PoseGraphEdge()
-    #     pose_graph_edge.key_from = MultiRobotKey()
-    #     pose_graph_edge.key_from.robot_id = int(dict["key_from"]["robot_id"])
-    #     pose_graph_edge.key_from.keyframe_id = int(dict["key_from"]["keyframe_id"])
-    #     pose_graph_edge.key_to = MultiRobotKey()
-    #     pose_graph_edge.key_to.robot_id = int(dict["key_to"]["robot_id"])
-    #     pose_graph_edge.key_to.keyframe_id = int(dict["key_to"]["keyframe_id"])
-    #     pose_graph_edge.measurement = self.dict_to_pose(dict["measurement"])
-    #     pose_graph_edge.noise_std = dict["noise_std"]                    
-    #     return pose_graph_edge
 
     def visualization_callback(self):
         marker_array = self.robot_pose_graphs_to_marker_array()

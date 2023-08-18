@@ -20,14 +20,7 @@ if __name__ == '__main__':
                         ('produce_mesh', False),
                         ('voxel_size', 0.5),
                         ('rotation_to_sensor_frame', None),
-                        ('pose_graph_markers_size', 0.1),
-                        # TODO: test if this default value works
-                        # TODO: raise exception if map_path is not given when enable_map_storage or 
-                        # enable_map_reading are true, or use a default path 
-                        ('map_path', ''),
-                        ('pose_graph_file_name', 'pose_graph.json'), 
-                        ('enable_map_storage', False),
-                        ('enable_map_reading', False),]), 
+                        ('pose_graph_markers_size', 0.1),]), 
     params = {}
     params['nb_colors'] = node.get_parameter(
         'nb_colors').value
@@ -45,12 +38,6 @@ if __name__ == '__main__':
         'pose_graph_markers_size').value
     params['produce_mesh'] = node.get_parameter(
         'produce_mesh').value
-    
-    # Storage parameters
-    params['map_path'] = node.get_parameter(
-        'map_path').value
-    params['pose_graph_file_name'] = node.get_parameter(
-        'pose_graph_file_name').value
     
     pose_graph_viz = PoseGraphVisualizer(node, params)
     keypoints_viz = []
